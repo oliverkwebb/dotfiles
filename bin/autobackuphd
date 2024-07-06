@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+lsblk | grep -q "sda1" || { figlet "NO USB!!"; exit; }
+lsblk | grep -q "sda2" && { figlet "WRONG USB!!"; exit; }
+[ -d /run/media/oliver/Backups ] || udisksctl mount --block-device /dev/sda1
+[ -d /run/media/oliver/Backups ] || exit
+rsync -hazv --delete-excluded --exclude-from="$HOME/.config/nobackup"\
+  "$HOME" "${1:-/run/media/oliver/Backups}"
+udisksctl unmount --block-device /dev/sda1

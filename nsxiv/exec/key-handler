@@ -1,0 +1,21 @@
+#!/bin/sh
+
+PICDIRS=~/Pictures:~/Memes/Pictures
+while read file
+do
+        case "$1" in
+        "C-d") rm "$file" ;;
+        "C-c") echo -n "$file" | xclip -selection clipboard ;;
+		"C-r") mv "$file" "$(dirname "$file")/$(dmenu -p "New Name:" < /dev/null)" ;;
+        "C-w") xwallpaper --stretch "$file" ;;
+		"C-e") $(printf "gimp\ndrawing\ntrue" | dmenu -p "Edit File With" -l 5) "$file" & ;;
+		"C-m")
+			SELITEM=$(find $(echo $PICDIRS | tr ':' ' ') -type d | dmenu -h 16 -l 12 -p "Directory:")
+			[ -z "$SELITEM" ] || mv "$file" $SELITEM ;;
+		"C-l") ln -sf $(realpath $file) ~/Pictures/Wallpapers/lockscreen.png && notify-send "Lock Screen set to: $file" ;;
+		"C-W") ln -sf $(realpath $file) ~/Pictures/Wallpapers/wallpaper.png  && notify-send "Wallpaper set to: $file"	;;
+
+		*) printf "%s\n" "$1" ;;
+        esac
+done
+

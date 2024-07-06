@@ -1,0 +1,28 @@
+#!/bin/sh
+set -e
+
+BOOKMARKLOC="$HOME/.local/bookmarks"
+
+getItems(){
+  awk "/^\s*[id]\s*$1\s/ {print \$3}" "$BOOKMARKLOC"
+}
+
+getIV () {
+  printf "%s" "${SELITEM:?}" | cut -d' ' -f"$1"
+}
+
+PROMPT="$(getItems 0 | dmenu)"
+SELITEM="$(grep -m 1 "${PROMPT:?}" "$BOOKMARKLOC")"
+echo $SELITEM
+
+while [ "$(getIV 1)" = "d" ]; do
+  PWCAT="$(getIV 4)"
+  PROMPT="$(getItems "${PWCAT:?}" | dmenu)"
+  SELITEM="$(grep -m 1 "${PROMPT:?}" "$BOOKMARKLOC")"
+done
+
+if [ -z "$(getIV 5)" ]; then 
+  exec firefox "$(getIV 4)" 
+else 
+  eval "${SELITEM#* * * * } $(getIV 4)"
+fi

@@ -1,0 +1,22 @@
+#!/bin/sh
+set -e
+CHARLOC="$HOME/.local/dm_unicode_emojis"
+
+SELITEM=$(awk 'BEGIN{print "Add New Item"} {$1=""; gsub(/^\s*/,""); print $0}' "$CHARLOC" | dmenu -l 8 -h 16 -p "Emoji:")
+
+# Add item support
+if [ "${SELITEM:?}" = "Add New Item" ]; then
+	NEWEMOJI=$(dmenu -p "New Emoji:" < /dev/null) 
+	[ -z "$NEWEMOJI" ] && exit
+
+	NEWDESC=$( dmenu -p "Description:" < /dev/null) 
+	[ -z "$NEWDESC" ] && exit
+	printf "%s\t%s\n" "$NEWEMOJI" "$NEWDESC" >> $CHARLOC
+	exit
+fi
+
+printf "%s" "$(grep "$SELITEM" "$CHARLOC" | cut -f1)" | xclip -sel clipboard
+
+TMPFILE=$(mktemp)
+grep -F "$SELITEM" "$CHARLOC" > "$TMPFILE" && grep -Fv "$SELITEM" "$CHARLOC" >> "$TMPFILE" && cat "$TMPFILE" > "$CHARLOC"
+

@@ -1,0 +1,14 @@
+#!/bin/sh
+OPDIR="$HOME/Music"
+
+while getopts liId: flag; do
+	case "$flag" in
+		l) RECUR=1   ;;
+    I) LOOP=--loop-playlist   ;;
+    i) ;;
+    d) if [ "$OPDIR" != "$HOME/Music" ]; then OPDIR="$OPDIR $OPTARG"; else OPDIR="$OPTARG"; fi ;;
+    *) echo 'msf [-liI] [-d DIR]'; exit 1;;
+	esac
+done
+
+exec mpv --no-video $MPVFLAGS $LOOP $(find $OPDIR ${RECUR:+-maxdepth 1} \! -path "*exclude/*" \! -name . -name "*.ogg" -type f) --shuffle

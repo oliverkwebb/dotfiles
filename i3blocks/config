@@ -1,0 +1,47 @@
+[rss]
+interval=3600
+label=📰
+command=[ "$BLOCK_BUTTON" = 1 ] && st -e 'newsboat' > /dev/null ; newsboat -x reload -x print-unread | cut -d' ' -f1
+
+[net]
+interval=persist
+signal=11
+command=~/.config/i3blocks/bin/net
+
+[cpu]
+interval=persist
+markup=pango
+label=<span color="#57E"><b>CPU</b></span>
+command=~/.config/i3blocks/bin/cpu -c 95 -w 70
+
+[memory]
+interval=persist
+markup=pango
+color_critical=#d9534f
+label=<span color="#57E"><b>MEM </b></span>
+command=~/.config/i3blocks/bin/mem
+
+[volume]
+interval=once
+markup=pango
+command=[ "$BLOCK_BUTTON" = 1 ] && ( st -e pulsemixer; ~/.config/i3blocks/volume ) || ~/.config/i3blocks/volume
+signal=10
+
+[brigtness]
+interval=once
+signal=10
+label=🔆
+command=brightnessctl -m | cut -d, -f4
+
+[battery]
+command=acpi -b | sed "s/.*: \([^,]*\), \(1\?[0-9][0-9]%\).*/\1\2/; s/Discharging/🔋/; s/Charging/⚡/; s/Full/😀/"
+markup=pango
+interval=60
+
+[moonphase]
+command=mprintf "%e (%P%%)"
+interval=300
+
+[time]
+command=~/.config/i3blocks/bin/date
+interval=persist

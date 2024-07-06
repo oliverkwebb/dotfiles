@@ -1,0 +1,8 @@
+#!/bin/sh
+
+VOL="$(pamixer --get-volume-human)"
+[ "$(pamixer --default-source --get-mute)" = "false" ] && MIC="🎤" || MIC="🤐"
+
+[ "$VOL" != "muted" ] && SYMBOL='🔊 ' COLOR="#FFF" || SYMBOL=' ' COLOR="#FF0"
+
+echo "<span color='$COLOR'>$SYMBOL$VOL $MIC</span>"

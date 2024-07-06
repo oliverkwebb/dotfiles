@@ -1,0 +1,62 @@
+#!/bin/sh
+
+DELAY="0"
+MODE="D"
+VIEWER="nsxiv"
+
+SHOTPROMPT='1:Take shot\n2:Mode Change\n3:Delay+5s\n4:Delay-5s'
+
+while true; do
+	SELITEM=$(printf "$SHOTPROMPT" | dmenu -h 16 -l 4 -p "Mode:$MODE Del:$DELAY")
+
+	[ -z "$SELITEM" ] && exit
+
+	SELN="${SELITEM%:*}"
+	case $SELN in
+		1) break ;;
+		2) 
+			MODEPROMPT='D:Fullscreen\nW:Window\nS:Selection'
+			MDSEL=$(printf $MODEPROMPT | dmenu -h 16 -p "Mode:" -l 3)
+			[ -z $MDSEL ] || MODE="${MDSEL%:*}"
+			;;
+		3) DELAY=$((DELAY+5)) ;;
+		4) DELAY=$((DELAY-5)) ;;
+		*) exit 11 ;;
+	esac
+done
+
+[ $DELAY -lt 0 ] && DELAY="0"
+
+SHOTUTIL="scrot "
+case $MODE in
+	W) UTILFLAG="-u";;
+	S) UTILFLAG="-s --line mode=edge";;
+esac
+SHOTBUFFER=$($SHOTUTIL $UTILFLAG -d $DELAY -e 'realpath $f')
+[ -z $SHOTBUFFER ] && exit 20
+
+$VIEWER $SHOTBUFFER &
+VPID=$!
+
+SAVEPROMPT='1:Save Image\n2:Change Name\n3:Change Directory\n4:Restart'
+SAVEDIR=~/Pictures/
+FNAME=$(basename $SHOTBUFFER)
+
+while true; do
+	SELITEM=$(printf "$SAVEPROMPT" | dmenu -h 16 -l 4 -p "$(printf "Name:%s Dir:%s" $FNAME $SAVEDIR)")
+
+	[ -z "$SELITEM" ] && rm "$SHOTBUFFER" && kill $VPID && exit
+
+	SELN="${SELITEM%:*}"
+	SDIRNAMES=~/Pictures:~/Memes/Pictures
+	case $SELN in
+		1) break ;;
+		2) FNAME=$(dmenu -p "Name:" < /dev/null);;
+		3) SAVEDIR=$(find $(printf "%s" $SDIRNAMES | tr ':' ' ') -type d | dmenu -h 16 -l 12 -p "Directory:") ;;
+		4) kill $VPID; rm "$SHOTBUFFER"; dshot & exit ;;
+		*) exit 41 ;;
+	esac
+done
+
+kill $VPID
+mv "$SHOTBUFFER" $(realpath "$SAVEDIR")/$(basename "$FNAME").png
